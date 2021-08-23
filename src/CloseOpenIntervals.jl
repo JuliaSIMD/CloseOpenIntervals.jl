@@ -32,7 +32,7 @@ import ArrayInterface
 ArrayInterface.known_first(::Type{<:AbstractCloseOpen{StaticInt{F}}}) where {F} = F
 ArrayInterface.known_step(::Type{<:AbstractCloseOpen}) = 1
 ArrayInterface.known_last(::Type{<:AbstractCloseOpen{<:Any,StaticInt{L}}}) where {L} = L - 1
-ArrayInterface.known_length(::Type{AbstractCloseOpen{StaticInt{F},StaticInt{L}}}) where {F,L} = L - F
+ArrayInterface.known_length(::Type{<:AbstractCloseOpen{StaticInt{F},StaticInt{L}}}) where {F,L} = L - F
 
 Base.IteratorSize(::Type{<:AbstractCloseOpen}) = Base.HasShape{1}()
 Base.IteratorEltype(::Type{<:AbstractCloseOpen}) = Base.HasEltype()

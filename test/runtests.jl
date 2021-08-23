@@ -27,4 +27,5 @@ const ArrayInterface = CloseOpenIntervals.ArrayInterface
   @test @inferred(mysum(x, CloseOpenIntervals.StaticInt(128))) ≈ sum(x)
   @test @inferred(ArrayInterface.static_length(CloseOpen(CloseOpenIntervals.StaticInt(128)))) === CloseOpenIntervals.StaticInt(128)
   @test @inferred(eltype(CloseOpen(7))) === Int
+  @test ArrayInterface.known_length(CloseOpen(CloseOpenIntervals.StaticInt(128))) == 128
 end
