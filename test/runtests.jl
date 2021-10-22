@@ -1,6 +1,14 @@
 using CloseOpenIntervals
 using Test
 
+function mysum2(X = CartesianIndices((SafeCloseOpen(10),SafeCloseOpen(10))))
+  s = 0
+  for I in X
+    s += sum(Tuple(I))
+  end
+  s
+end
+mysum2_allocated() = @allocated(mysum2())
 const ArrayInterface = CloseOpenIntervals.ArrayInterface
 @testset "CloseOpenIntervals.jl" begin
   function mysum(x, N)
@@ -28,13 +36,6 @@ const ArrayInterface = CloseOpenIntervals.ArrayInterface
   @test @inferred(ArrayInterface.static_length(CloseOpen(CloseOpenIntervals.StaticInt(128)))) === CloseOpenIntervals.StaticInt(128)
   @test @inferred(eltype(CloseOpen(7))) === Int
   @test ArrayInterface.known_length(CloseOpen(CloseOpenIntervals.StaticInt(128))) == 128
-  function mysum2(X = CartesianIndices((SafeCloseOpen(10),SafeCloseOpen(10))))
-    s = 0
-    for I in X
-      s += sum(Tuple(I))
-    end
-    s
-  end
   @test @inferred(mysum2()) == sum(0:9)*2*length(0:9)
-  @test @allocated(mysum2()) == 0
+  @test mysum2_allocated() == 0
 end
