@@ -46,6 +46,6 @@ Base.IteratorEltype(::Type{<:AbstractCloseOpen}) = Base.HasEltype()
     return true, (I1, Base.tail(state)...)
   end
   valid, I = Base.IteratorsMD.__inc(Base.tail(state), Base.tail(indices))
-  return valid, (Int(first(rng)), I...)
+  return valid, (convert(typeof(I1), first(rng)), I...)
 end
 end
