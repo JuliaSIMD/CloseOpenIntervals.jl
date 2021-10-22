@@ -39,4 +39,13 @@ Base.IteratorEltype(::Type{<:AbstractCloseOpen}) = Base.HasEltype()
 @inline Base.size(r::AbstractCloseOpen) = (length(r),)
 @inline Base.eltype(r::AbstractCloseOpen) = Int
 
+@inline function Base.IteratorsMD.__inc(state::Tuple{Int,Int,Vararg{Int}}, indices::Tuple{AbstractCloseOpen,Vararg{Base.IteratorsMD.OrdinalRangeInt}})
+  rng = indices[1]
+  I1 = state[1] + step(rng)
+  if Base.IteratorsMD.__is_valid_range(I1, rng) && state[1] != last(rng)
+    return true, (I1, Base.tail(state)...)
+  end
+  valid, I = Base.IteratorsMD.__inc(Base.tail(state), Base.tail(indices))
+  return valid, (Int(first(rng)), I...)
+end
 end
