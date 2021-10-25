@@ -38,6 +38,7 @@ Base.IteratorSize(::Type{<:AbstractCloseOpen}) = Base.HasShape{1}()
 Base.IteratorEltype(::Type{<:AbstractCloseOpen}) = Base.HasEltype()
 @inline Base.size(r::AbstractCloseOpen) = (length(r),)
 @inline Base.eltype(r::AbstractCloseOpen) = Int
+@inline Base.eachindex(r::AbstractCloseOpen) = StaticInt(1):ArrayInterface.static_length(r)
 
 @static if isdefined(Base.IteratorsMD, :OrdinalRangeInt)
   @inline function Base.IteratorsMD.__inc(state::Tuple{Int,Int,Vararg{Int}}, indices::Tuple{AbstractCloseOpen,Vararg{Base.IteratorsMD.OrdinalRangeInt}})
