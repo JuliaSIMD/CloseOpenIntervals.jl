@@ -20,4 +20,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/JuliaSIMD/CloseOpenIntervals.jl",
+    devbranch = "main",
 )
