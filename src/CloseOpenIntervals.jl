@@ -3,6 +3,32 @@ module CloseOpenIntervals
 using Static: StaticInt, Zero, One
 export CloseOpen, SafeCloseOpen
 
+"""
+    CloseOpen([start=0], U) <: AbstractUnitRange{Int}
+    SafeCloseOpen([start=0], U) <: AbstractUnitRange{Int}
+  
+Define close-open unit ranges, i.e. `CloseOpen(0,10)` iterates from from `0:9`.
+Close-open ranges can be more convenient in some circumstances, e.g. when
+partitioning a larger array.
+
+```julia
+
+function foo(x)
+  nt = Threads.nthreads()
+  d, r = divrem(length(x), nt)
+  i = firstindex(x)  
+  Threads.@sync for j in 1:nt
+    stop = i + d + (r >= j)
+    Threads.@spawn bar!($(@view(x[CloseOpen(i, stop)])))
+    i = stop
+  end
+end
+```
+This saves a few `-1`s on the ends of the ranges if using a normal unit range.
+
+`SafeCloseOpen` will not iterate if `U <= start`, while `CloseOpen` doesn't check
+for this, and thus the behavior is undefined in that case.
+"""
 abstract type AbstractCloseOpen{L <: Integer, U <: Integer} <: AbstractUnitRange{Int} end
 for T ∈ (:CloseOpen,:SafeCloseOpen)
   @eval begin
