@@ -32,7 +32,7 @@ function foo(x)
   i = firstindex(x)  
   Threads.@sync for j in 1:nt
     stop = i + d + (r >= j)
-    Threads.@spawn bar!($(@view(x[CloseOpen(i, stop)])))
+    Threads.@spawn bar!(\$(@view(x[CloseOpen(i, stop)])))
     i = stop
   end
 end
