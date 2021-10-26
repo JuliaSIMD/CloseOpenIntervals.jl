@@ -3,6 +3,19 @@ module CloseOpenIntervals
 using Static: StaticInt, Zero, One
 export CloseOpen, SafeCloseOpen
 
+abstract type AbstractCloseOpen{L <: Integer, U <: Integer} <: AbstractUnitRange{Int} end
+for T ∈ (:CloseOpen,:SafeCloseOpen)
+  @eval begin
+    struct $T{L <: Integer, U <: Integer} <: AbstractCloseOpen{L,U}
+      start::L
+      upper::U
+      @inline $T{L,U}(l::L,u::U) where {L <: Integer, U <: Integer} = new{L,U}(l,u)
+    end
+    @inline $T(s::S, u::U) where {S,U} = $T{S,U}(s, u)
+    @inline $T(len::T) where {T<:Integer} = $T{Zero,T}(Zero(), len)
+  end
+end
+
 """
     CloseOpen([start=0], U) <: AbstractUnitRange{Int}
     SafeCloseOpen([start=0], U) <: AbstractUnitRange{Int}
@@ -29,18 +42,22 @@ This saves a few `-1`s on the ends of the ranges if using a normal unit range.
 `SafeCloseOpen` will not iterate if `U <= start`, while `CloseOpen` doesn't check
 for this, and thus the behavior is undefined in that case.
 """
-abstract type AbstractCloseOpen{L <: Integer, U <: Integer} <: AbstractUnitRange{Int} end
-for T ∈ (:CloseOpen,:SafeCloseOpen)
-  @eval begin
-    struct $T{L <: Integer, U <: Integer} <: AbstractCloseOpen{L,U}
-      start::L
-      upper::U
-      @inline $T{L,U}(l::L,u::U) where {L <: Integer, U <: Integer} = new{L,U}(l,u)
-    end
-    @inline $T(s::S, u::U) where {S,U} = $T{S,U}(s, u)
-    @inline $T(len::T) where {T<:Integer} = $T{Zero,T}(Zero(), len)
-  end
-end
+AbstractCloseOpen
+"""
+    CloseOpen([start=0], U) <: AbstractUnitRange
+
+Iterates over the range start:U-1. Guaranteed to iterate at least once, skipping initial empty check.
+See `?AbstractCloseOpen` for more information.
+"""
+CloseOpen
+"""
+    SafeCloseOpen([start=0], U) <: AbstractUnitRange
+
+Iterates over the range start:U-1. Will not iterate if it `isempty`, like a typical range, making it
+generally the preferred choice over `CloseOpen`.
+See `?AbstractCloseOpen` for more information.
+"""
+SafeCloseOpen
 
 @inline Base.first(r::AbstractCloseOpen) = getfield(r,:start)
 @inline Base.first(r::AbstractCloseOpen{StaticInt{F}}) where {F} = StaticInt{F}()
