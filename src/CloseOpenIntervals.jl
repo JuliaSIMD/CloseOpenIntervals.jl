@@ -3,16 +3,18 @@ module CloseOpenIntervals
 using Static: StaticInt, Zero, One
 export CloseOpen, SafeCloseOpen
 
-abstract type AbstractCloseOpen{L <: Union{Int,StaticInt}, U <: Union{Int,StaticInt}} <: AbstractUnitRange{Int} end
+const IntegerType = Union{Integer,StaticInt}
+
+abstract type AbstractCloseOpen{L <: IntegerType, U <: IntegerType} <: AbstractUnitRange{Int} end
 for T ∈ (:CloseOpen,:SafeCloseOpen)
   @eval begin
-    struct $T{L <: Union{Int,StaticInt}, U <: Union{Int,StaticInt}} <: AbstractCloseOpen{L,U}
+    struct $T{L <: IntegerType, U <: IntegerType} <: AbstractCloseOpen{L,U}
       start::L
       upper::U
-      @inline $T{L,U}(l::L,u::U) where {L <: Union{Int,StaticInt}, U <: Union{Int,StaticInt}} = new{L,U}(l,u)
+      @inline $T{L,U}(l::L,u::U) where {L <: IntegerType, U <: IntegerType} = new{L,U}(l,u)
     end
     @inline $T(s::S, u::U) where {S,U} = $T{S,U}(s, u)
-    @inline $T(len::T) where {T<:Union{Int,StaticInt}} = $T{Zero,T}(Zero(), len)
+    @inline $T(len::T) where {T<:IntegerType} = $T{Zero,T}(Zero(), len)
   end
 end
 
@@ -62,14 +64,14 @@ SafeCloseOpen
 @inline Base.first(r::AbstractCloseOpen) = getfield(r,:start)
 @inline Base.first(r::AbstractCloseOpen{StaticInt{F}}) where {F} = F
 @inline Base.step(::AbstractCloseOpen) = 1
-@inline Base.last(r::AbstractCloseOpen{<:Union{Int,StaticInt},I}) where {I} = getfield(r,:upper) - 1
-@inline Base.last(r::AbstractCloseOpen{<:Union{Int,StaticInt},StaticInt{L}}) where {L} = L - 1
+@inline Base.last(r::AbstractCloseOpen{<:IntegerType,I}) where {I} = getfield(r,:upper) - 1
+@inline Base.last(r::AbstractCloseOpen{<:IntegerType,StaticInt{L}}) where {L} = L - 1
 @inline Base.length(r::AbstractCloseOpen) = getfield(r,:upper) - getfield(r,:start)
 @inline Base.length(r::AbstractCloseOpen{Zero}) = getfield(r,:upper)
 
 @inline Base.iterate(r::CloseOpen) = (i = Int(first(r)); (i, i))
 @inline Base.iterate(r::SafeCloseOpen) = (i = Int(first(r)); i ≥ getfield(r, :upper) ? nothing : (i, i))
-@inline Base.iterate(r::AbstractCloseOpen, i::Union{Int,StaticInt}) = (i += one(i)) ≥ getfield(r, :upper) ? nothing : (i, i)
+@inline Base.iterate(r::AbstractCloseOpen, i::IntegerType) = (i += one(i)) ≥ getfield(r, :upper) ? nothing : (i, i)
 
 import ArrayInterface
 ArrayInterface.known_first(::Type{<:AbstractCloseOpen{StaticInt{F}}}) where {F} = F
