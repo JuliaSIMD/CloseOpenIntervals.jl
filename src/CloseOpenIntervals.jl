@@ -66,8 +66,8 @@ SafeCloseOpen
 @inline Base.step(::AbstractCloseOpen) = 1
 @inline Base.last(r::AbstractCloseOpen{<:IntegerType,I}) where {I} = getfield(r,:upper) - 1
 @inline Base.last(r::AbstractCloseOpen{<:IntegerType,StaticInt{L}}) where {L} = L - 1
-@inline Base.length(r::AbstractCloseOpen) = getfield(r,:upper) - getfield(r,:start)
-@inline Base.length(r::AbstractCloseOpen{Zero}) = getfield(r,:upper)
+@inline Base.length(r::AbstractCloseOpen) = Int(getfield(r,:upper) - getfield(r,:start))
+@inline Base.length(r::AbstractCloseOpen{Zero}) = Int(getfield(r,:upper))
 
 @inline Base.iterate(r::CloseOpen) = (i = Int(first(r)); (i, i))
 @inline Base.iterate(r::SafeCloseOpen) = (i = Int(first(r)); i ≥ getfield(r, :upper) ? nothing : (i, i))
