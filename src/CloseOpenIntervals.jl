@@ -1,4 +1,8 @@
 module CloseOpenIntervals
+if isdefined(Base, :Experimental) &&
+   isdefined(Base.Experimental, Symbol("@max_methods"))
+    @eval Base.Experimental.@max_methods 1
+end
 
 using Static: StaticInt, Zero, One
 export CloseOpen, SafeCloseOpen
