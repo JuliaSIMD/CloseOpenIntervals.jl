@@ -77,17 +77,17 @@ SafeCloseOpen
 @inline Base.iterate(r::SafeCloseOpen) = (i = Int(first(r)); i ≥ getfield(r, :upper) ? nothing : (i, i))
 @inline Base.iterate(r::AbstractCloseOpen, i::IntegerType) = (i += one(i)) ≥ getfield(r, :upper) ? nothing : (i, i)
 
-import ArrayInterface
-ArrayInterface.known_first(::Type{<:AbstractCloseOpen{StaticInt{F}}}) where {F} = F
-ArrayInterface.known_step(::Type{<:AbstractCloseOpen}) = 1
-ArrayInterface.known_last(::Type{<:AbstractCloseOpen{<:Any,StaticInt{L}}}) where {L} = L - 1
-ArrayInterface.known_length(::Type{<:AbstractCloseOpen{StaticInt{F},StaticInt{L}}}) where {F,L} = L - F
+import StaticArrayInterface
+StaticArrayInterface.known_first(::Type{<:AbstractCloseOpen{StaticInt{F}}}) where {F} = F
+StaticArrayInterface.known_step(::Type{<:AbstractCloseOpen}) = 1
+StaticArrayInterface.known_last(::Type{<:AbstractCloseOpen{<:Any,StaticInt{L}}}) where {L} = L - 1
+StaticArrayInterface.known_length(::Type{<:AbstractCloseOpen{StaticInt{F},StaticInt{L}}}) where {F,L} = L - F
 
 Base.IteratorSize(::Type{<:AbstractCloseOpen}) = Base.HasShape{1}()
 Base.IteratorEltype(::Type{<:AbstractCloseOpen}) = Base.HasEltype()
 @inline Base.size(r::AbstractCloseOpen) = (length(r),)
 @inline Base.eltype(r::AbstractCloseOpen) = Int
-@inline Base.eachindex(r::AbstractCloseOpen) = StaticInt(1):ArrayInterface.static_length(r)
+@inline Base.eachindex(r::AbstractCloseOpen) = StaticInt(1):StaticArrayInterface.static_length(r)
 
 @static if isdefined(Base.IteratorsMD, :OrdinalRangeInt)
   @inline function Base.IteratorsMD.__inc(state::Tuple{Int,Int,Vararg{Int}}, indices::Tuple{AbstractCloseOpen,Vararg{Base.IteratorsMD.OrdinalRangeInt}})
