@@ -89,11 +89,23 @@ Base.IteratorEltype(::Type{<:AbstractCloseOpen}) = Base.HasEltype()
 @inline Base.eltype(r::AbstractCloseOpen) = Int
 @inline Base.eachindex(r::AbstractCloseOpen) = StaticInt(1):StaticArrayInterface.static_length(r)
 
+# `__is_valid_range` was removed in Julia v1.11.0 (JuliaLang/julia#51606)
+@inline __is_valid_range(I, rng::AbstractUnitRange) = I in rng
+@inline function __is_valid_range(I, rng::OrdinalRange)
+  if step(rng) > 0
+    lo, hi = first(rng), last(rng)
+  else
+    lo, hi = last(rng), first(rng)
+  end
+  lo <= I <= hi
+end
+
+# `OrdinalRangeInt` was introduced in Julia v1.7.0 (JuliaLang/julia#40594)
 @static if isdefined(Base.IteratorsMD, :OrdinalRangeInt)
   @inline function Base.IteratorsMD.__inc(state::Tuple{Int,Int,Vararg{Int}}, indices::Tuple{AbstractCloseOpen,Vararg{Base.IteratorsMD.OrdinalRangeInt}})
     rng = indices[1]
     I1 = state[1] + step(rng)
-    if Base.IteratorsMD.__is_valid_range(I1, rng) && state[1] != last(rng)
+    if __is_valid_range(I1, rng) && state[1] != last(rng)
       return true, (I1, Base.tail(state)...)
     end
     valid, I = Base.IteratorsMD.__inc(Base.tail(state), Base.tail(indices))
@@ -103,7 +115,7 @@ else
   @inline function Base.IteratorsMD.__inc(state::Tuple{Int,Int,Vararg{Int}}, indices::Tuple{AbstractCloseOpen,Vararg})
     rng = indices[1]
     I1 = state[1] + step(rng)
-    if Base.IteratorsMD.__is_valid_range(I1, rng) && state[1] != last(rng)
+    if __is_valid_range(I1, rng) && state[1] != last(rng)
       return true, (I1, Base.tail(state)...)
     end
     valid, I = Base.IteratorsMD.__inc(Base.tail(state), Base.tail(indices))
